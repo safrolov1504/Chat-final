@@ -1,6 +1,7 @@
 package clientChat.messageServer;
 
 import clientChat.interfaceMy.Controller;
+import clientChat.interfaceMy.WorkWithHistory;
 import javafx.collections.FXCollections;
 import networkChatCommons.variosOfMessage.ClientListMessage;
 import networkChatCommons.Command;
@@ -10,6 +11,7 @@ import javafx.scene.control.TextArea;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Properties;
 
 public class ServiceMassage implements IMessageService{
@@ -18,13 +20,14 @@ public class ServiceMassage implements IMessageService{
     private boolean isAuth = false;
     private String hostAddress;
     private int hostPort;
+    private WorkWithHistory history;
 
     private TextArea textArea;
-    private IMessageService messageService;
+//    private IMessageService messageService;
     private Network network;
     private Controller primaryController;
-    private boolean needStopServerOnClosed;
-    private boolean needStopServiceClient;
+//    private boolean needStopServerOnClosed;
+//    private boolean needStopServiceClient;
 
     private String nickname;
     public void setNetwork(Network network) {
@@ -99,6 +102,18 @@ public class ServiceMassage implements IMessageService{
             primaryController.yourNickField.setText(nickname);
             primaryController.authPanel.setVisible(false);
             primaryController.chatPanel.setVisible(true);
+            System.out.println("В этот момент появлется все");
+
+            try {
+                history = new WorkWithHistory(message.authMessage.login);
+                String lastHistory = history.takeLastHistory();
+                textArea.appendText(lastHistory);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            textArea.appendText("Welcome to the chat!"+System.lineSeparator()+
+                    (new Date(System.currentTimeMillis())).toString()+System.lineSeparator());
+
         }
         else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -109,12 +124,16 @@ public class ServiceMassage implements IMessageService{
     }
 
     private void printMessage(Message message){
+        String messagePrint;
         if(message.command.equals(Command.PUBLIC_MESSAGE)){
-            textArea.appendText(message.publicMessage.from+": "+ message.publicMessage.message+System.lineSeparator());
+            messagePrint = message.publicMessage.from+": "+ message.publicMessage.message;
+            textArea.appendText(messagePrint+System.lineSeparator());
+            history.addHistory(messagePrint);
         }
         else if (message.command.equals(Command.PRIVATE_MESSAGE)){
-            String messageOut ="Private message from " +message.privateMessage.from + ": " + message.privateMessage.message;
-            textArea.appendText(messageOut+System.lineSeparator());
+            messagePrint ="Private message from " +message.privateMessage.from + ": " + message.privateMessage.message;
+            textArea.appendText(messagePrint+System.lineSeparator());
+            history.addHistory(messagePrint);
         }
         else if((message.changeNickMessage.oldNick.equals(nickname))&&
                 (message.command.equals(Command.CHANGE_NICK)||message.command.equals(Command.CHANGE_NICK_OK))){
@@ -134,10 +153,14 @@ public class ServiceMassage implements IMessageService{
 
     @Override
     public void close() {
-        if(needStopServerOnClosed){
+//        if(needStopServerOnClosed){
             Message message = Message.creatEnd();
             sendMessage(message.toJson());
-        }
+ //       }
         network.onClose();
+    }
+
+    public void addNewHistory(String message){
+        history.addHistory(message);
     }
 }

@@ -17,7 +17,7 @@
 <children>
       <VBox fx:id="newUserBox" prefHeight="200.0" prefWidth="610.0" visible="false">
          <children>
-            <Button fx:id="back" mnemonicParsing="false" onAction="#ButtonBack" text="Назад">
+            <Button fx:id="buttonBack" mnemonicParsing="false" onAction="#ButtonBack" text="Назад">
                <VBox.margin>
                   <Insets left="10.0" top="10.0" />
                </VBox.margin>
@@ -61,7 +61,7 @@
                   </HBox.margin>
               </Button>
           </HBox>
-            <Button fx:id="NewUser" mnemonicParsing="false" onAction="#creatNewUser" text="новый пользователь">
+            <Button fx:id="buttonNewUser" mnemonicParsing="false" onAction="#creatNewUser" text="новый пользователь">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
@@ -96,7 +96,7 @@
                   <Label text="your nick:" />
                   <TextArea fx:id="yourNickField" editable="false" prefHeight="16.0" prefWidth="100.0" />
                   <ListView fx:id="clientsList" prefHeight="161.0" prefWidth="100.0" />
-                  <Button fx:id="changeNickInChat" mnemonicParsing="false" onAction="#changeNickInChan" prefHeight="44.0" prefWidth="100.0" text="Измен. ник" />
+                  <Button fx:id="buttenChangeNickInChat" mnemonicParsing="false" onAction="#changeNickInChan" prefHeight="44.0" prefWidth="100.0" text="Измен. ник" />
                </children>
             </VBox>
          </children>

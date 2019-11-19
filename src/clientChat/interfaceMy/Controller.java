@@ -30,16 +30,16 @@ public class Controller implements Initializable {
     public @FXML HBox authPanelIn;
     public @FXML HBox chatPanel;
     public @FXML VBox timeOutBox;
-    public @FXML Button NewUser;
+    public @FXML Button buttonNewUser;
 
 
     public @FXML TextField nickFieldNew;
     public @FXML TextField loginFieldNew;
     public @FXML PasswordField passFieldNew;
-    public @FXML Button back;
+    public @FXML Button buttonBack;
     public @FXML VBox newUserBox;
 
-    public Button changeNickInChat;
+    public Button buttenChangeNickInChat;
     public VBox chanNickBox;
     public TextField nickFieldChangeOld;
     public TextField nickFieldChangNew;
@@ -103,35 +103,39 @@ public class Controller implements Initializable {
     }
 
     private void sendMessage (){
-        String message = enterText.getText();
-        textArea.appendText("Я: " + message+System.lineSeparator());
-
-        Message msg = buildMessage(message);
+        String message = "Я: "+ enterText.getText();
+        textArea.appendText(message+System.lineSeparator());
+        messageService.addNewHistory(message);
+        Message msg = MessageController.buildMessage(clientsList,nickName,message);
+        //Message msg = buildMessage(message);
 
         messageService.sendMessage(msg.toJson());
         enterText.clear();
     }
 
-    private Message buildMessage(String message) {
-        String selectedNickname = clientsList.getSelectionModel().getSelectedItem();
-        if (selectedNickname !=null){
-            return buildPrivateMessage(selectedNickname, message);
-        }
-        return buildPublicMessage(message);
-    }
+    {
+//    private Message buildMessage(String message) {
+//        String selectedNickname = clientsList.getSelectionModel().getSelectedItem();
+//        if (selectedNickname !=null){
+//            return buildPrivateMessage(selectedNickname, message);
+//        }
+//        return buildPublicMessage(message);
+//    }
 
-    private Message buildPrivateMessage(String selectedNickname, String message){
-        PrivateMessage privateMsg = new PrivateMessage();
-        privateMsg.from = nickName;
-        privateMsg.to = selectedNickname;
-        privateMsg.message = message;
-        return Message.creatPrivate(privateMsg);
-    }
-    private Message buildPublicMessage(String message) {
-        PublicMessage publicMsg  =new PublicMessage();
-        publicMsg.from =nickName;
-        publicMsg.message = message;
-        return Message.creatPublic(publicMsg);
+//    private Message buildPrivateMessage(String selectedNickname, String message){
+//        PrivateMessage privateMsg = new PrivateMessage();
+//        privateMsg.from = nickName;
+//        privateMsg.to = selectedNickname;
+//        privateMsg.message = message;
+//        return Message.creatPrivate(privateMsg);
+//    }
+//
+//    private Message buildPublicMessage(String message) {
+//        PublicMessage publicMsg  =new PublicMessage();
+//        publicMsg.from =nickName;
+//        publicMsg.message = message;
+//        return Message.creatPublic(publicMsg);
+//    }
     }
 
     public void shutdown()  {

@@ -12,4 +12,6 @@ public interface IMessageService {
     }
 
     boolean isAuth();
+
+    void addNewHistory(String ms);
 }
