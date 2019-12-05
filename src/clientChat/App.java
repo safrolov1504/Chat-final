@@ -14,6 +14,7 @@ public class App extends Application {
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("/clientChat/resources/sample.fxml"));
 
+
         Parent root = loader.load();
         Scene scene = new Scene(root);
         primaryStage.setTitle("My Chat");

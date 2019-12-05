@@ -1,6 +1,7 @@
 package serverChat.auth;
 
 import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
+import serverChat.MyServer;
 
 import java.sql.*;
 
@@ -14,7 +15,8 @@ public class SQLUsers {
         Class.forName("org.sqlite.JDBC");
         con = DriverManager.getConnection(URL_SQL);
         //Statement statement = con.createStatement();
-        System.out.println("There is connection with SQL");
+        //System.out.println("There is connection with SQL");
+        MyServer.admin.info("There is connection with SQL");
     }
 
     public void disconnect() throws SQLException {

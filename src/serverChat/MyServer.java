@@ -13,11 +13,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.log4j.*;
 
 public class MyServer {
     private static final int PORT = 8189;
     private final AuthServer authServer=new BaseAuthServer();
     private List<ClientHandler> clients = new ArrayList<>();
+    public static Logger admin = Logger.getLogger("admin");
+    public static Logger file = Logger.getLogger("file");
 
     public AuthServer getAuthServer() {
         return authServer;
@@ -25,20 +28,23 @@ public class MyServer {
 
     //запуск сервера
     public MyServer() {
-        System.out.println("server is running");
+        //System.out.println("server is running");
+        admin.info("server is running");
         try(ServerSocket serverSocket = new ServerSocket(PORT)) {
             authServer.start();
             while (true){
-                System.out.println("Waiting for client");
+                admin.info("Waiting for client");
                 Socket socket = serverSocket.accept();
-                System.out.println("Client has connected");
+                admin.info("Client has connected");
                 new ClientHandler(socket, this);
             }
         } catch (IOException e) {
-            System.err.println("Error server. Reason: "+ e.getMessage());
+            admin.error("Error server. Reason: "+ e.getMessage());
+            //System.err.println("Error server. Reason: "+ e.getMessage());
             e.printStackTrace();
         } catch (SQLException e) {
-            System.out.println("SQL error: "+e.getMessage());
+            admin.error("SQL error: "+e.getMessage());
+            //System.out.println("SQL error: "+e.getMessage());
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -46,6 +52,7 @@ public class MyServer {
             try {
                 authServer.stop();
             } catch (SQLException e) {
+                admin.error(e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -71,8 +78,6 @@ public class MyServer {
         broadcastMessage(message.toJson());
     }
 
-
-
     public synchronized boolean isNickBusy(String nick) {
         for (ClientHandler client : clients) {
             if(client.getClientName().equals(nick)){
@@ -84,7 +89,7 @@ public class MyServer {
 
     public synchronized void broadcastMessage(String message,ClientHandler... unfilteredClients) {
         List<ClientHandler> unfiltered = Arrays.asList(unfilteredClients);
-        System.out.println("send: "+message);
+        //System.out.println("send: "+message);
         for (ClientHandler client : clients) {
             if(!unfiltered.contains(client)){
                 client.SendMessage(message);
@@ -103,7 +108,6 @@ public class MyServer {
         for (ClientHandler client:clients) {
             if(client.getClientName().equals(recievedLogin)&& (!unfiltered.contains(client))){
                 client.SendMessage(msg.toJson());
-                //client.sendMessage("Private message from " + sendLogin + ": "+ message);
                 break;
             }
         }

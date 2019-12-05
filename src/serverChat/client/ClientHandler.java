@@ -56,6 +56,7 @@ public class ClientHandler {
                 }
             }).start();
         } catch (IOException e) {
+            MyServer.admin.error("Failed to creat client handler");
             throw new RuntimeException("Failed to creat client handler", e);
         }
     }
@@ -103,16 +104,19 @@ public class ClientHandler {
 
             if (nick == null) {
                 creatAnswerForAuth(authMessage, "Не верный логин и пароль");
+                MyServer.admin.warn("tried to log in with incorrect login: "+ authMessage.login+"; or password: "+authMessage.password);
                 return;
             }
 
             //проверяет есть ли такой ник
             if (myServer.isNickBusy(nick)) {
                 creatAnswerForAuth(authMessage,"Учетная запись уже используется");
+                MyServer.admin.warn("tried to log in with also used login: "+ authMessage.login);
                 return;
             }
             creatAnswerForAuth(authMessage, Command.AUTH_OK.toString());
             clientName = nick;
+            MyServer.admin.warn("Authntification is ok. Nick: "+authMessage.nick);
 
             myServer.broadcastMessage(broadcastGeneralInformation(" is online"));
             myServer.subscribe(this);
@@ -144,7 +148,10 @@ public class ClientHandler {
                 case CHANGE_NICK:
                     if(SQLUsers.isNickBusy(m.changeNickMessage.newNick)){
                         m.changeNickMessage.message = "Ник уже занят";
-                        System.out.println(m.toJson());
+                        //System.out.println(m.toJson());
+                        MyServer.admin.warn("Tried to change a nick with ERROR. Nick is busy. Old nick: "+m.changeNickMessage.oldNick
+                        +" New nick: "+ m.changeNickMessage.newNick);
+
                         this.SendMessage(m.toJson());
                     }
                     else{
@@ -154,17 +161,33 @@ public class ClientHandler {
                         myServer.unsubscribe(this);
                         clientName = m.changeNickMessage.newNick;
 
+                        MyServer.admin.warn("Nick was successfully changed. Old nick: "+m.changeNickMessage.oldNick
+                                +" new nick: "+m.changeNickMessage.newNick);
+
+                        String messageOut="Пользователь "+ m.changeNickMessage.oldNick +
+                                " сменил ник на "+ m.changeNickMessage.newNick;
+
+                        MyServer.admin.trace(messageOut);
+                        MyServer.file.info("General information: " + messageOut);
+
                         myServer.broadcastMessage(
-                                broadcastGeneralInformation("Пользователь "+ m.changeNickMessage.oldNick +
-                                        " сменил ник на "+ m.changeNickMessage.newNick),this);
+                                broadcastGeneralInformation(messageOut),this);
+
                         myServer.subscribe(this);
-                        System.out.println("Меняем ник");
                     }
 
                 case PUBLIC_MESSAGE:
+                    String logMessage = "Public message from "+ m.publicMessage.from+" "+m.publicMessage.message;
+                    MyServer.admin.info(logMessage);
+                    MyServer.file.info(logMessage);
+
                     myServer.broadcastMessage(clientMessage,this);
                     break;
                 case PRIVATE_MESSAGE:
+                    logMessage = "Private message from "+ m.privateMessage.from+"to "+m.privateMessage.to+ "message: " + m.privateMessage.message;
+                    MyServer.admin.info(logMessage);
+                    MyServer.file.info(logMessage);
+
                     PrivateMessage privateMessage = m.privateMessage;
                     myServer.sendPrivateMessage(privateMessage.from, privateMessage.to,privateMessage.message,this);
                     break;
@@ -178,7 +201,8 @@ public class ClientHandler {
         try {
             out.writeUTF(message);
         } catch (IOException e) {
-            System.err.println("Failed to send message to user " + clientName + ": "+ message);
+            MyServer.admin.error("Failed to send message to user " + clientName + ": "+ message);
+            //System.err.println("Failed to send message to user " + clientName + ": "+ message);
             e.printStackTrace();
         }
     }
@@ -189,7 +213,8 @@ public class ClientHandler {
         try {
             socket.close();
         } catch (IOException e) {
-            System.err.println("Failed to close socket!");
+            MyServer.admin.error("Failed to close socket!");
+            //System.err.println("Failed to close socket!");
             e.printStackTrace();
         }
     }
